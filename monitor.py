@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import time
+import random
 
 # Grabs your secret from GitHub Settings
 WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK')
@@ -36,6 +38,10 @@ def get_current_links():
         return {}
 
 def monitor():
+    # --- STEALTH DELAY ---
+    # Wait between 1 and 30 seconds before starting
+    time.sleep(random.randint(1, 30)) 
+    
     if not WEBHOOK_URL:
         return
 
