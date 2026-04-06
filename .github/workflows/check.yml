@@ -1,0 +1,35 @@
+name: Chrome Hearts Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
+  workflow_dispatch:        # Lets you click "Run Now" to test
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # Crucial: allows the bot to save link_history.txt
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run Monitor Script
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.https://discord.com/api/webhooks/1490728017058594897/DxP9Gqo_9QRU0qtXF8T1j_d2zqHpzE9HWLmMyAq2JTTdqKlaTezLTk25oHqVCIvc8Pwd }}
+        run: python monitor.py
+
+      - name: Save History Changes
+        run: |
+          git config --global user.name "CH-Monitor-Bot"
+          git config --global user.email "bot@github.com"
+          git add link_history.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update history" && git push)
