@@ -35,7 +35,7 @@ def monitor():
     # 2. Find the "New" stuff (Difference between sets)
     new_items = current_links - old_links
 
-    if True:
+    if new_items:
         added_text = ", ".join(new_items)
         msg = f"🚨 **CHROME HEARTS SITE UPDATE**\nNew Tab(s) Detected: **{added_text}**\nCheck here: {URL}"
         requests.post(WEBHOOK_URL, json={"content": msg})
