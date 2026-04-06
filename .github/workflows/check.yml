@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Monitor Script
         env:
-          DISCORD_WEBHOOK: ${{ secrets.https://discord.com/api/webhooks/1490728017058594897/DxP9Gqo_9QRU0qtXF8T1j_d2zqHpzE9HWLmMyAq2JTTdqKlaTezLTk25oHqVCIvc8Pwd }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: python monitor.py
 
       - name: Save History Changes
