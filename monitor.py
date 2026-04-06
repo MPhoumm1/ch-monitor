@@ -2,16 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1490728017058594897/DxP9Gqo_9QRU0qtXF8T1j_d2zqHpzE9HWLmMyAq2JTTdqKlaTezLTk25oHqVCIvc8Pwd"
+# Grabs your secret from GitHub Settings
+WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK')
 URL = "https://www.chromehearts.com/"
 HISTORY_FILE = "link_history.txt"
 
 def get_current_links():
-    headers = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+    }
     try:
-        response = requests.get(URL, headers=headers, timeout=15)
+        response = requests.get(URL, headers=headers, timeout=20)
         soup = BeautifulSoup(response.text, 'html.parser')
-        # This grabs every clickable link text on the page (tabs, buttons, nav)
+        # This grabs every link text (tabs, buttons, nav items)
         links = {a.text.strip() for a in soup.find_all('a') if a.text.strip()}
         return links
     except Exception as e:
@@ -19,11 +22,17 @@ def get_current_links():
         return set()
 
 def monitor():
+    if not WEBHOOK_URL:
+        print("Error: DISCORD_WEBHOOK secret is missing!")
+        return
+
     current_links = get_current_links()
+    if not current_links:
+        print("Could not find any links on the page. Skipping this run.")
+        return
     
-    # 1. Load the history from the last run
+    # 1. Load History
     if not os.path.exists(HISTORY_FILE):
-        # First time running: save current links and exit
         with open(HISTORY_FILE, "w") as f:
             f.write("\n".join(sorted(current_links)))
         print("Initial history created.")
@@ -32,20 +41,20 @@ def monitor():
     with open(HISTORY_FILE, "r") as f:
         old_links = set(line.strip() for line in f.readlines())
 
-    # 2. Find the "New" stuff (Difference between sets)
+    # 2. Compare
     new_items = current_links - old_links
 
     if new_items:
         added_text = ", ".join(new_items)
-        msg = f"🚨 **CHROME HEARTS SITE UPDATE**\nNew Tab(s) Detected: **{added_text}**\nCheck here: {URL}"
-        requests.post(WEBHOOK_URL, json={"content": msg})
+        msg = {"content": f"🚨 **CHROME HEARTS UPDATE**\nNew Tab(s): **{added_text}**\nLink: {URL}"}
+        requests.post(WEBHOOK_URL, json=msg)
         
-        # 3. Update the history file with the new state
+        # 3. Update History
         with open(HISTORY_FILE, "w") as f:
             f.write("\n".join(sorted(current_links)))
         print(f"Update found: {added_text}")
     else:
-        print("No changes detected.")
+        print("No changes detected. Site is the same.")
 
 if __name__ == "__main__":
     monitor()
