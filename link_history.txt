@@ -6,7 +6,6 @@ CA Supply Chain Act
 Chengdu
 Contact
 Europe
-Eyewear
 General
 Hangzhou
 Hong Kong
@@ -28,3 +27,4 @@ Taipei
 Terms
 Terms & Conditions
 Underwear
+scarf
